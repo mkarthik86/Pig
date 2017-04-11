@@ -1,0 +1,56 @@
+This tutorial will enable you to gain a working knowledge of Pig and hands-on experience creating Pig scripts to carry out essential data operations and tasks.
+In this tutorial, you will first read in two data files that contain New York Stock Exchange dividend prices and stock prices, and then use these files to perform a number of Pig operations including :
+
+Define a relation with and without schema
+Define a new relation from an existing relation
+Select specific columns from within a relation
+Join two relations
+Sort the data using ‘ORDER BY’
+FILTER and Group the data using ‘GROUP BY’
+
+
+
+Test Data
+
+You’ll need sample data for this tutorial. The data set you will be using is stock ticker data from the New York Stock Exchange from the years 2000-2001. Download this sample data from the following location:
+https://s3.amazonaws.com/hw-sandbox/tutorial1/infochimps_dataset_4778_download_16677-csv.zip
+
+The file is about 11 megabytes, and might take a few minutes to download.
+Open the folder  infochimps_dataset_4778_download_16677 > NYSE and locate the two data files that you will be using for this tutorial:
+NYSE_daily_prices_A.csv
+NYSE_dividends_A.csv
+
+
+Define a relation
+
+STOCK_A = LOAD 'nyse/NYSE_daily_prices_A.csv' using PigStorage(','); DESCRIBE STOCK_A;
+
+
+Relation with Schema
+
+STOCK_A = LOAD ‘/user/Cloudera/NYSE/NYSE_daily_prices_A.csv' using PigStorage(',') AS (exchange:chararray, symbol:chararray, date:chararray, open:float, high:float, low:float, close:float, volume:int, adj_close:float);
+ DESCRIBE STOCK_A;
+
+Specific column
+
+STOCK_A = LOAD ‘/user/cloudera/NYSE/NYSE_daily_prices_A.csv' using PigStorage(',') AS (exchange:chararray, symbol:chararray, date:chararray, open:float, high:float, low:float, close:float, volume:int, adj_close:float); B = LIMIT STOCK_A 100; C = FOREACH B GENERATE symbol, date, close; DESCRIBE C;
+
+Store
+STORE C INTO ‘/user/cloudera/NYSE/output/C';
+
+Joins
+STOCK_A = LOAD ‘/user/cloudera/NYSE/NYSE_daily_prices_A.csv' using PigStorage(',') AS (exchange:chararray, symbol:chararray, date:chararray, open:float, high:float, low:float, close:float, volume:int, adj_close:float); DIV_A = LOAD 'NYSE_dividends_A.csv' using PigStorage(',') AS (exchange:chararray, symbol:chararray, date:chararray, dividend:float); C = JOIN STOCK_A BY (symbol, date), DIV_A BY (symbol, date); DESCRIBE C;
+
+Sorting
+
+DIV_A = LOAD ‘/user/cloudera/NYSE/NYSE_dividends_A.csv' using PigStorage(',') AS (exchange:chararray, symbol:chararray, date:chararray, dividend:float); B = ORDER DIV_A BY symbol, date asc; DUMP B;
+
+Filter And Group By
+
+DIV_A = LOAD ‘/user/cloudera/NYSE/NYSE_dividends_A.csv' using PigStorage(',') AS (exchange:chararray, symbol:chararray, date:chararray, dividend:float); B = FILTER DIV_A BY symbol=='AZZ'; C = GROUP B BY dividend; DESCRIBE C; DUMP C;
+
+
+
+
+
+
